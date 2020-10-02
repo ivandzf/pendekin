@@ -4,9 +4,10 @@
 extern crate rocket;
 
 pub mod api;
+pub mod models;
 
 fn main() {
     rocket::ignite()
-        .mount("/", routes![api::short::index])
+        .mount("/", routes![api::shortener::index])
         .launch();
 }
