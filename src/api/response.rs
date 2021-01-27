@@ -1,47 +1,26 @@
-use rocket::http::{ContentType, Status};
-use rocket::request::Request;
-use rocket::response::{Responder, Response};
-use rocket_contrib::json;
-use rocket_contrib::json::JsonValue;
-use std::io::Cursor;
+use actix_web::http::StatusCode;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
-pub struct BaseResponse {
-    status: Status,
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BaseResponse<T> {
+    status: u16,
     message: &'static str,
-    data: JsonValue,
+    data: T,
 }
 
-impl BaseResponse {
-    pub fn data(mut self, data: JsonValue) -> BaseResponse {
-        self.data = data;
-        self
-    }
-}
-
-impl<'r> Responder<'r> for BaseResponse {
-    fn respond_to(self, request: &Request) -> Result<Response<'r>, Status> {
-        let body = self.data;
-        Response::build()
-            .status(self.status)
-            .sized_body(Cursor::new(body.to_string()))
-            .header(ContentType::JSON)
-            .ok()
-    }
-}
-
-pub fn ok() -> BaseResponse {
+pub fn ok<T>(data: T) -> BaseResponse<T> {
     BaseResponse {
-        status: Status::Ok,
+        status: StatusCode::OK.as_u16(),
         message: "Success",
-        data: json!(null),
+        data,
     }
 }
 
-pub fn created() -> BaseResponse {
+pub fn created<T>(data: T) -> BaseResponse<T> {
     BaseResponse {
-        status: Status::Created,
+        status: StatusCode::CREATED.as_u16(),
         message: "Created",
-        data: json!(null),
+        data,
     }
 }
